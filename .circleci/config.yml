@@ -1,0 +1,71 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+  
+    docker:
+      - image: circleci/openjdk:8-jdk
+
+    working_directory: ~/epg-mapper
+
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys: 
+            - epg-mapper-{{ checksum "pom.xml" }}
+            - epg-mapper-
+
+      - run: mvn dependency:go-offline
+
+      - run: mvn clean package
+
+      - run: mvn org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=$SONARCLOUD_ORG_KEY -Dsonar.login=$SONARCLOUD_TOKEN
+
+      - store_artifacts:
+          path: target
+          
+      - save_cache:
+          key: epg-mapper-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+          
+      - save_cache:
+          key: epg-mapper-target-{{ checksum "pom.xml" }}
+          paths:
+            - target
+
+  deploy:
+    docker:
+      - image: google/cloud-sdk:alpine
+    working_directory: ~/epg-mapper
+    steps:
+      - checkout
+      
+      - restore_cache:
+          key: epg-mapper-target-{{ checksum "pom.xml" }}
+          
+      - run:
+          command: |
+            echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json 
+            gcloud components update 
+            gcloud components install app-engine-java
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json 
+            gcloud config set project $GCLOUD_PROJECT
+            cp /home/circleci/epg-mapper/target/epg-mapper-1.0-SNAPSHOT-fat.jar ./
+      - run: gcloud app deploy app.yaml
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
