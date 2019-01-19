@@ -1,4 +1,4 @@
-![CircleCI](https://img.shields.io/circleci/project/codizz/epg-mapper.svg)
+![CircleCI](https://img.shields.io/circleci/project/github/georg-koch/epg-mapper/master.svg)
 ![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=de.codizz:epg-mapper&metric=alert_status)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcodizz%2Fepg-mapper.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcodizz%2Fepg-mapper?ref=badge_shield)
 
