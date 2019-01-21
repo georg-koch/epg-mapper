@@ -4,7 +4,7 @@
 package de.codizz.epgmapper;
 
 import static spark.Spark.*;
-d
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
